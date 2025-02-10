@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "1a82a01b-8040-4d90-a5d6-4a60afd5fbf4",
+		"name": "ApproveMe",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21771954"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5036/api/auth/login",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Approve transcation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3RVc2VyQEFwcHJvdmVNZS5kayIsIm5iZiI6MTczOTE5NTgzMiwiZXhwIjoxNzM5MTk5NDMyLCJpYXQiOjE3MzkxOTU4MzIsImlzcyI6IkFwcHJvdmVNZUlzc3VlciIsImF1ZCI6IkFwcHJvdmVNZUF1ZGllbmNlIn0.u4WZlw1Orudd6kytvr6G_leN1F9totmb-oOlxUXInmw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5036/api/transaction/2/approve",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"transaction",
+						"2",
+						"approve"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get transactions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IlRlc3RVc2VyQEFwcHJvdmVNZS5kayIsIm5iZiI6MTczOTE5NTgzMiwiZXhwIjoxNzM5MTk5NDMyLCJpYXQiOjE3MzkxOTU4MzIsImlzcyI6IkFwcHJvdmVNZUlzc3VlciIsImF1ZCI6IkFwcHJvdmVNZUF1ZGllbmNlIn0.u4WZlw1Orudd6kytvr6G_leN1F9totmb-oOlxUXInmw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:5036/api/transaction",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5036",
+					"path": [
+						"api",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwtToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Check if we already have a token",
+					"let token = pm.environment.get(\"jwtToken\");",
+					"",
+					"// Optionally, you can add logic here to check if the token is expired",
+					"// For simplicity, this script will only fetch a new token if none is present.",
+					"if (!token) {",
+					"    // Configure the login request",
+					"    let loginRequest = {",
+					"        url: pm.environment.get(\"baseUrl\") + \"/api/auth/login\",",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Content-Type': 'application/json'",
+					"        }",
+					"        // ,",
+					"        // body: {",
+					"        //     mode: 'raw',",
+					"        //     raw: JSON.stringify({",
+					"        //         // Replace with your actual login credentials",
+					"        //         username: \"your-username\",",
+					"        //         password: \"your-password\"",
+					"        //     })",
+					"        // }",
+					"    };",
+					"",
+					"    // Send the login request",
+					"    pm.sendRequest(loginRequest, function (err, res) {",
+					"        if (err) {",
+					"            console.error('Login request failed:', err);",
+					"            return;",
+					"        }",
+					"        ",
+					"        // Extract the token from the response",
+					"        let jsonResponse = res.json();",
+					"        let newToken = jsonResponse.token;",
+					"        ",
+					"        // Store the token in the environment variable",
+					"        pm.environment.set(\"jwtToken\", newToken);",
+					"        console.log(\"JWT updated:\", newToken);",
+					"    });",
+					"} else {",
+					"    console.log(\"Using stored JWT:\", token);",
+					"}",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
