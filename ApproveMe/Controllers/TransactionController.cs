@@ -12,9 +12,9 @@ namespace ApproveMe.Controllers
     {
         private static readonly List<Transaction> _transactions = new()
         {
-            new() { Id = 1, Description = "Transaction 1" },
-            new() { Id = 2, Description = "Transaction 2" },
-            new() { Id = 3, Description = "Transaction 3" }
+            new() { Id = Guid.NewGuid(), Comment = "Transaction 1" },
+            new() { Id = Guid.NewGuid(), Comment = "Transaction 2" },
+            new() { Id = Guid.NewGuid(), Comment = "Transaction 3" }
         };
 
         // GET: api/transaction
@@ -27,7 +27,7 @@ namespace ApproveMe.Controllers
 
         // POST: api/transaction/{id}/approve
         [HttpPost("{id}/approve")]
-        public IActionResult ApproveTransaction(int id)
+        public IActionResult ApproveTransaction(Guid id)
         {
             var transaction = _transactions.FirstOrDefault(t => t.Id == id);
             if (transaction == null)
@@ -49,7 +49,7 @@ namespace ApproveMe.Controllers
 
         // POST: api/transaction/{id}/deny
         [HttpPost("{id}/deny")]
-        public IActionResult DenyTransaction(int id)
+        public IActionResult DenyTransaction(Guid id)
         {
             var transaction = _transactions.FirstOrDefault(t => t.Id == id);
             if (transaction == null)
