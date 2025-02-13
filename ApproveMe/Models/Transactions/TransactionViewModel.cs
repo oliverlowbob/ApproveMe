@@ -2,7 +2,7 @@ namespace ApproveMe.Models.Transactions;
 
 public class TransactionViewModel
 {
-    public required int Id { get; set; }
+    public required Guid Id { get; set; }
     public required string Status { get; set; }
     public required string Description { get; set; }
     
@@ -12,7 +12,7 @@ public class TransactionViewModel
         {
             Id = transaction.Id,
             Status = transaction.Status.ToString(),
-            Description = transaction.Description
+            Description = transaction.Comment,
         };
 
         return viewModel;
