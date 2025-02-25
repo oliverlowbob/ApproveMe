@@ -12,9 +12,9 @@ namespace ApproveMe.Controllers
     {
         private static readonly List<Transaction> _transactions = new()
         {
-            new() { Id = Guid.NewGuid(), Comment = "Transaction 1" },
-            new() { Id = Guid.NewGuid(), Comment = "Transaction 2" },
-            new() { Id = Guid.NewGuid(), Comment = "Transaction 3" }
+            new() { Id = Guid.NewGuid(), Content = "Transaction 1" },
+            new() { Id = Guid.NewGuid(), Content = "Transaction 2" },
+            new() { Id = Guid.NewGuid(), Content = "Transaction 3" }
         };
 
         // GET: api/transaction

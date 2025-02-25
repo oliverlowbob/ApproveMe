@@ -12,7 +12,7 @@ public class TransactionViewModel
         {
             Id = transaction.Id,
             Status = transaction.Status.ToString(),
-            Description = transaction.Comment,
+            Description = transaction.Content,
         };
 
         return viewModel;
