@@ -18,18 +18,15 @@ public class FileUploadController : ControllerBase
 
         var parser = GetParser(file.FileName);
 
+        // TODO: Create a DataBatch, add transactions, and save to your PostgreSQL DB
+        var dataBatchId = Guid.NewGuid();
+
         await using var stream = file.OpenReadStream();
         var records = parser.Parse(stream, selectedRows);
 
         // Map each record to a Transaction or other domain model as needed
-        var transactions = records.Select(record => new Transaction
-        {
-            Id = Guid.NewGuid(),
-            Content = string.Join(", ", record.Values.Select(v => v?.ToString())),
-            Status = TransactionStatus.Pending
-        }).ToList();
+        var transactions = records.Select(record => new Transaction(string.Join(", ", record.Values.Select(v => v?.ToString())), dataBatchId)).ToList();
 
-        // TODO: Create a DataBatch, add transactions, and save to your PostgreSQL DB
 
         return Ok("File processed successfully");
     }
