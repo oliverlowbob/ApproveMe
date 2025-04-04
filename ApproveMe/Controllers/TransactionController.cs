@@ -10,12 +10,12 @@ namespace ApproveMe.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class TransactionController(IDocumentStore store, IDocumentSession session) : ControllerBase
+    public class TransactionController(IRepository repository, IDocumentSession session) : ControllerBase
     {
         [HttpGet]
         public async Task<IResult> GetAll()
         {
-            var transactions = await session.Query<Transaction>().ToListAsync();
+            var transactions = await session.Query<TransactionAggregate>().ToListAsync();
             
             var viewModels = transactions.Select(TransactionViewModel.FromTransaction);
             return TypedResults.Ok(viewModels);
@@ -24,9 +24,7 @@ namespace ApproveMe.Controllers
         [HttpPost("{id}/approve")]
         public async Task<IResult> ApproveTransaction(Guid id)
         {
-            var repository = new AggregateRepository(store);
-
-            var transaction = await repository.LoadAsync<Transaction>(id);
+            var transaction = await repository.Load<TransactionAggregate>(id);
             
             if (transaction == null)
             {
@@ -40,7 +38,7 @@ namespace ApproveMe.Controllers
 
             transaction.Approve(User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown");
             
-            await repository.StoreAsync(transaction);
+            await repository.Save(transaction);
             
             return TypedResults.Ok(TransactionViewModel.FromTransaction(transaction));
         }
@@ -48,9 +46,7 @@ namespace ApproveMe.Controllers
         [HttpPost("{id}/deny")]
         public async Task<IResult> DenyTransaction(Guid id)
         {
-            var repository = new AggregateRepository(store);
-
-            var transaction = await repository.LoadAsync<Transaction>(id);
+            var transaction = await repository.Load<TransactionAggregate>(id);
             
             if (transaction == null)
             {
@@ -64,7 +60,7 @@ namespace ApproveMe.Controllers
 
             transaction.Deny(User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown");
             
-            await repository.StoreAsync(transaction);
+            await repository.Save(transaction);
             
             return TypedResults.Ok(TransactionViewModel.FromTransaction(transaction));
         }

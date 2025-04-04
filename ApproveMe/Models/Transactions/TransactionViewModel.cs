@@ -6,13 +6,13 @@ public class TransactionViewModel
     public required string Status { get; set; }
     public required string Description { get; set; }
     
-    public static TransactionViewModel FromTransaction(Transaction transaction)
+    public static TransactionViewModel FromTransaction(TransactionAggregate transactionAggregate)
     {
         var viewModel = new TransactionViewModel
         {
-            Id = transaction.Id,
-            Status = transaction.Status.ToString(),
-            Description = transaction.Content,
+            Id = transactionAggregate.Id,
+            Status = transactionAggregate.Status.ToString(),
+            Description = transactionAggregate.Content,
         };
 
         return viewModel;

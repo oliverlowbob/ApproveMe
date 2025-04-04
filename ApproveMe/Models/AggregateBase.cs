@@ -1,29 +1,48 @@
-using System.Text.Json.Serialization;
+using System.Reflection;
+using ApproveMe.InternalEvents;
 
 namespace ApproveMe.Models;
 
 public abstract class AggregateBase
 {
-    public Guid Id { get; protected set; }
+    private readonly IList<BaseEvent> _uncommittedEvents = new List<BaseEvent>();
 
-    // For protecting the state, i.e. conflict prevention
-    // The setter is only public for setting up test conditions
-    public long Version { get; set; }
+    public Guid Id { get; set; }
+    public int Version { get; set; }
 
-    [JsonIgnore] private readonly List<object> _uncommittedEvents = new List<object>();
-
-    public IEnumerable<object> GetUncommittedEvents()
+    protected void RaiseEvent(BaseEvent @event)
     {
-        return _uncommittedEvents;
-    }
+        ApplyEvent(@event);
 
-    public void ClearUncommittedEvents()
-    {
-        _uncommittedEvents.Clear();
-    }
-
-    protected void AddUncommittedEvent(object @event)
-    {
         _uncommittedEvents.Add(@event);
+    }
+
+    private void ApplyEvent(BaseEvent @event)
+    {
+        var applyMethod = GetType()
+            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(m => m.Name == "Apply" && m.GetParameters().Length == 1 && m.ReturnParameter.ParameterType == typeof(void))
+            .SingleOrDefault(m => m.GetParameters().Single().ParameterType == @event.GetType());
+
+        if (applyMethod != null)
+        {
+            applyMethod.Invoke(this, new[] { @event });
+
+            Version++;
+        }
+    }
+
+    public BaseEvent[] DequeueUncommittedEvents(bool orderEventsByTimestamp)
+    {
+        var dequeuedEvents = _uncommittedEvents.ToList();
+
+        if (orderEventsByTimestamp)
+        {
+            dequeuedEvents = dequeuedEvents.OrderBy(x => x.Timestamp).ToList();
+        }
+
+        _uncommittedEvents.Clear();
+
+        return dequeuedEvents.ToArray();
     }
 }

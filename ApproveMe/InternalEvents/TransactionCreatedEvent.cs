@@ -10,8 +10,8 @@ public class TransactionCreatedEvent : BaseEvent
         Status = TransactionStatus.Pending;
         DataBatchId = dataBatchId;
     }
-    
-    public TransactionStatus Status;
-    public string Content;
-    public Guid DataBatchId;
+
+    public TransactionStatus Status { get; set; }
+    public string Content { get; set; }
+    public Guid DataBatchId { get; set; }
 }

@@ -1,21 +1,23 @@
 using ApproveMe.FileParsers;
 using ApproveMe.Models.Transactions;
+using ApproveMe.Repositories;
+using Marten;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApproveMe.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FileUploadController : ControllerBase
+public class FileUploadController(IRepository repository) : ControllerBase
 {
-    [HttpPost("upload")]
+    [HttpPost]
     public async Task<IActionResult> Upload(IFormFile file, [FromQuery] List<int> selectedRows)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest("File is empty");
         }
-
+        
         var parser = GetParser(file.FileName);
 
         // TODO: Create a DataBatch, add transactions, and save to your PostgreSQL DB
@@ -24,9 +26,14 @@ public class FileUploadController : ControllerBase
         await using var stream = file.OpenReadStream();
         var records = parser.Parse(stream, selectedRows);
 
-        // Map each record to a Transaction or other domain model as needed
-        var transactions = records.Select(record => new Transaction(string.Join(", ", record.Values.Select(v => v?.ToString())), dataBatchId)).ToList();
+        var transactions = records.Select(record => new TransactionAggregate(string.Join(", ", record.Values.Select(v => v?.ToString())), dataBatchId)).ToList();
 
+        foreach (var transaction in transactions)
+        { 
+            repository.Store(transaction);
+        }
+
+        await repository.SaveChanges();
 
         return Ok("File processed successfully");
     }
